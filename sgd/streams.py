@@ -58,7 +58,7 @@ class Streams:
         self.constructed["behaviorHints"]["proxyHeaders"] = {
             "request": {"Server": "Stremio"}
         }
-        return f"{self.proxy_url}/load/{file_id}/{file_name}"
+        return f"{self.proxy_url}/{file_name}?id={file_id}"
 
     def get_gapi_url(self):
         file_id = self.item.get("id")
