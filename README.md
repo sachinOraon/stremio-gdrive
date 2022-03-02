@@ -1,4 +1,6 @@
-
+```diff
+- This repository is only for deploying it using Docker on your personal VPS
+```
 # stremio-gdrive
 
 ![image](https://user-images.githubusercontent.com/38104354/114273627-6f3c4900-9a38-11eb-8052-f05f5f414e84.png)
@@ -44,6 +46,18 @@ There are two ways to go about:
 ```json
 {"token": "jhgdfgdhgfh", "refresh_token": "1//sdhgbfdhghd", "token_uri": "https://oauth2.googleapis.com/token", "client_id": "hsdgfjhgfsd.apps.googleusercontent.com", "client_secret": "gfsdfsdgf", "scopes": ["https://www.googleapis.com/auth/drive"]}
 ```
+
+## Deploying on your personal VPS using Docker:
+1. Clone this repository `$ git clone -b docker https://github.com/sachinOraon/stremio-gdrive.git && cd stremio-gdrive`
+2. Generate server.crt and server.key files. For more details, click [here](https://kracekumar.com/post/54437887454/ssl-for-flask-local-development)
+3. `$ openssl genrsa -des3 -out server.key 2048`
+4. `$ openssl req -new -key server.key -out server.csr`
+5. `$ cp server.key server.key.org`
+6. `$ openssl rsa -in server.key.org -out server.key`
+7. `$ openssl x509 -req -days 365 -in server.csr -signkey sgd/server.key -out sgd/server.crt`
+8. Build the docker image `$ docker build -t stremio-gdrive:base .`
+9. Run the container `$ docker run -d --name=stremio-gdrive -p 8010:5000 -v $PWD:/usr/src/app -e TOKEN='insert the token obtained from above steps' -e CF_PROXY_URL='insert the cloudflare worker url' --restart unless-stopped stremio-gdrive:base`
+10. In the Addon search bar, paste the manifest link (`https://your-server-public-ip.com:8010/manifest.json`) and press enter. Click install and you are done.
 
 ### Skip to [Deploying to heroku](https://github.com/ssnjrthegr8/stremio-gdrive#deploying-to-heroku) if you dont want to use a proxy.
 21. Go to https://dash.cloudflare.com/ log in or sign up.
