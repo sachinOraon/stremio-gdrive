@@ -49,15 +49,24 @@ There are two ways to go about:
 
 ## Deploying on your personal VPS using Docker:
 1. Clone this repository `$ git clone -b docker https://github.com/sachinOraon/stremio-gdrive.git && cd stremio-gdrive`
-2. Generate server.crt and server.key files. For more details, click [here](https://kracekumar.com/post/54437887454/ssl-for-flask-local-development)
-3. `$ openssl genrsa -des3 -out server.key 2048`
-4. `$ openssl req -new -key server.key -out server.csr`
-5. `$ cp server.key server.key.org`
-6. `$ openssl rsa -in server.key.org -out server.key`
-7. `$ openssl x509 -req -days 365 -in server.csr -signkey sgd/server.key -out sgd/server.crt`
-8. Build the docker image `$ docker build -t stremio-gdrive:base .`
-9. Run the container `$ docker run -d --name=stremio-gdrive -p 8010:5000 -v $PWD:/usr/src/app -e TOKEN='insert the token obtained from above steps' -e CF_PROXY_URL='insert the cloudflare worker url' --restart unless-stopped stremio-gdrive:base`
-10. In the Addon search bar, paste the manifest link (`https://your-server-public-ip.com:8010/manifest.json`) and press enter. Click install and you are done.
+2. Get a free domain for the VPS using free domain provider such as [Duckdns](https://www.duckdns.org/)
+3. Generate necessary files for enabling HTTPS using the methods provided below:
+  * Method 1 `Not recommended` using self-signed certificate/key files. For more details, click [here](https://kracekumar.com/post/54437887454/ssl-for-flask-local-development)
+    - `$ openssl genrsa -des3 -out server.key 2048`
+    - `$ openssl req -new -key server.key -out server.csr`
+    - `$ cp server.key server.key.org`
+    - `$ openssl rsa -in server.key.org -out server.key`
+    - `$ openssl x509 -req -days 365 -in server.csr -signkey sgd/server.key -out sgd/server.crt`
+   * Method 2 using certificate/key files signed by Let's encrypt. For more details, click [here](https://blog.miguelgrinberg.com/post/running-your-flask-application-over-https)
+     - Install [Docker](https://docs.docker.com/get-docker/)
+     - Execute this command and follow the instructions, for more details, click [here](https://eff-certbot.readthedocs.io/en/stable/install.html#running-with-docker) Make sure to open port 80 on the VPS before executing this command `$ sudo docker run -it --rm --name certbot -v "/path/to/etc/letsencrypt:/etc/letsencrypt" -v "/path/to/var/lib/letsencrypt:/var/lib/letsencrypt" -p 80:80 certbot/certbot certonly --standalone`
+     - Once the certificate files are generated, then create a link to these files in `stremio-gdrive/sgd`
+     - `ln -s /path/to/etc/letsencrypt/archive/yourdomain.duckdns.org/cert1.pem stremio-gdrive/sgd/cert1.pem`
+     - `ln -s /path/to/etc/letsencrypt/archive/yourdomain.duckdns.org/privkey1.pem stremio-gdrive/sgd/privkey1.pem`
+     - Modify the `stremio-gdrive/sgd/__init__.py` file like this: `context = ('cert1.pem', 'privkey1.pem')`
+4. Build the docker image `$ docker build -t stremio-gdrive:base .`
+5. Run the container `$ docker run -d --name=stremio-gdrive -p 8010:5000 -v $PWD:/usr/src/app -e TOKEN='insert the token obtained from above steps' -e CF_PROXY_URL='insert the cloudflare worker url' --restart unless-stopped stremio-gdrive:base`
+6. In the Addon search bar, paste the manifest link (`https://yourdomain.duckdns.org:8010/manifest.json`) and press enter. Click install and you are done.
 
 ### Skip to [Deploying to heroku](https://github.com/ssnjrthegr8/stremio-gdrive#deploying-to-heroku) if you dont want to use a proxy.
 21. Go to https://dash.cloudflare.com/ log in or sign up.
