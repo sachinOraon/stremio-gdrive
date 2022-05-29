@@ -1,9 +1,10 @@
+import io
 import requests
 from datetime import datetime, timedelta
 from sgd.cache import Pickle, Json
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
-
+from googleapiclient.http import MediaIoBaseDownload
 
 class GoogleDrive:
     def __init__(self, token):
@@ -11,7 +12,7 @@ class GoogleDrive:
         self.page_size = 1000
         self.acc_token = Pickle("acctoken.pickle")
         self.drive_names = Json("drivenames.json")
-
+        self.ERR_CODES = ["downloadQuotaExceeded", "fileNotDownloadable"]
         creds = Credentials.from_authorized_user_info(self.token)
         self.drive_instance = build("drive", "v3", credentials=creds)
 
@@ -63,10 +64,27 @@ class GoogleDrive:
                     out.append(self.qgen(f"{title} {sm.year}"))
         return out
 
+    def isDownloadable(self, file_id):
+        try:
+            request = self.drive_instance.files().get_media(fileId=file_id,
+                                                            supportsTeamDrives=True,
+                                                            supportsAllDrives=True)
+            fh = io.BytesIO()
+            downloader = MediaIoBaseDownload(fh, request, chunksize=1)
+            chunk = downloader.next_chunk()[1]
+        except Exception as err:
+            for code in self.ERR_CODES:
+                if code in str(err):
+                    return False
+        return True
+
     def file_list(self, file_fields):
         def callb(request_id, response, exception):
             if response:
-                output.extend(response.get("files"))
+                for file in response.get("files"):
+                    if self.isDownloadable(file.get("id")):
+                        output.append(file)
+                #output.extend(response.get("files"))
 
         if self.query:
             output = []
