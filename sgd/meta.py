@@ -55,23 +55,23 @@ class IMDb:
                 years = list(filter(ut.is_year, ut.num_extract(span_text)))
                 self.year = min(years) if years else None
 
-        if table:
-            table_rows = table.find_all("tr")
-            table_data = [tr.find_all("td") for tr in table_rows]
-
-            titles = set()
-            first_title = ut.safe_get(self.titles, 0)
-
-            for td in table_data:
-                title = ut.sanitize(ut.safe_get(td, 1).text)
-                if title and title != first_title:
-                    # Dont use titles which are just nums with 
-                    # less than 3 digits
-                    if not (title.isdigit() and len(title) < 3):
-                        titles.add(title)
-
-            limit = 29  # To "ease" gdrive batch api's suffering
-            self.titles += list(titles)[:limit]
+        # if table:
+        #     table_rows = table.find_all("tr")
+        #     table_data = [tr.find_all("td") for tr in table_rows]
+        #
+        #     titles = set()
+        #     first_title = ut.safe_get(self.titles, 0)
+        #
+        #     for td in table_data:
+        #         title = ut.sanitize(ut.safe_get(td, 1).text)
+        #         if title and title != first_title:
+        #             # Dont use titles which are just nums with
+        #             # less than 3 digits
+        #             if not (title.isdigit() and len(title) < 3):
+        #                 titles.add(title)
+        #
+        #     limit = 29  # To "ease" gdrive batch api's suffering
+        #     self.titles += list(titles)[:limit]
 
         if self.titles:
             if self.type == "series" or self.year:
