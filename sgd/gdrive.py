@@ -10,6 +10,7 @@ class GoogleDrive:
     def __init__(self, token):
         self.token = token
         self.page_size = 1000
+        self.max_res = 20
         self.acc_token = Pickle("acctoken.pickle")
         self.drive_names = Json("drivenames.json")
         self.ERR_CODES = ["downloadQuotaExceeded", "fileNotDownloadable"]
@@ -70,8 +71,9 @@ class GoogleDrive:
                                                             supportsTeamDrives=True,
                                                             supportsAllDrives=True)
             fh = io.BytesIO()
-            downloader = MediaIoBaseDownload(fh, request, chunksize=1)
+            downloader = MediaIoBaseDownload(fh, request, chunksize=1024*1024)
             chunk = downloader.next_chunk()[1]
+            fh.close()
         except Exception as err:
             for code in self.ERR_CODES:
                 if code in str(err):
@@ -80,10 +82,12 @@ class GoogleDrive:
 
     def file_list(self, file_fields):
         def callb(request_id, response, exception):
+            fcount = 0
             if response:
                 for file in response.get("files"):
-                    if self.isDownloadable(file.get("id")):
+                    if fcount <= self.max_res and self.isDownloadable(file.get("id")):
                         output.append(file)
+                        fcount += 1
                 #output.extend(response.get("files"))
 
         if self.query:
