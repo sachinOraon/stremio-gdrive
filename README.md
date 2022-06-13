@@ -59,7 +59,7 @@ There are two ways to go about:
     - `$ openssl x509 -req -days 365 -in server.csr -signkey sgd/server.key -out sgd/server.crt`
    * Method 2 using certificate/key files signed by Let's encrypt. For more details, click [here](https://blog.miguelgrinberg.com/post/running-your-flask-application-over-https)
      - Install [Docker](https://docs.docker.com/get-docker/)
-     - Execute this command and follow the instructions, for more details, click [here](https://eff-certbot.readthedocs.io/en/stable/install.html#running-with-docker) Make sure to open port 80 on the VPS before executing this command `$ sudo docker run -it --rm --name certbot -v "/path/to/etc/letsencrypt:/etc/letsencrypt" -v "/path/to/var/lib/letsencrypt:/var/lib/letsencrypt" -p 80:80 certbot/certbot certonly --standalone`
+     - Execute this command and follow the instructions, for more details, click [here](https://eff-certbot.readthedocs.io/en/stable/install.html#running-with-docker) Make sure to open port 80 on the VPS before executing this command `$ sudo docker run -it --rm --name certbot -v "/path/to/etc/letsencrypt:/etc/letsencrypt" -v "/path/to/var/lib/letsencrypt:/var/lib/letsencrypt" -p 80:80 certbot/certbot certonly --standalone` [Replace `certonly` with `renew` to renew the certificate]
      - Once the certificate files are generated, then create a link to these files in `stremio-gdrive/sgd`
      - `ln -s /path/to/etc/letsencrypt/archive/yourdomain.duckdns.org/cert1.pem stremio-gdrive/sgd/cert1.pem`
      - `ln -s /path/to/etc/letsencrypt/archive/yourdomain.duckdns.org/privkey1.pem stremio-gdrive/sgd/privkey1.pem`
